@@ -1,0 +1,68 @@
+Topic : Chat Application (Redis for Performance)
+
+3.1. Message Management (Saving and Retrieving Messages)
+
+-- Components Involved: --
+> MessageController
+> ChatService
+> MessageRepository
+> RedisTemplate 
+
+-- Flow: --
+> The MessageController handles HTTP requests for sending and retrieving messages.
+> The sendMessage() method in ChatController receives the message, then the ChatService saves the message to PostgreSQL using MessageRepository.
+> The message is also cached in Redis (using RedisTemplate) for faster access.
+> For fetching recent messages, the getRecentMessages() method in ChatService retrieves them from Redis, and for all messages for a user, getAllMessages() pulls from PostgreSQL.
+
+-- Sequence Diagram: --
+User -> ChatController -> ChatService -> MessageRepository -> RedisTemplate
+
+-- Detailed Steps: --
+1. Save Message:
+> A message is sent via the API (/send).
+> The message is first saved in PostgreSQL (using MessageRepository).
+> Then, it is cached in Redis to improve retrieval performance.
+
+2. Retrieve Messages:
+> Recent messages are retrieved from Redis with the API (/recent).
+> If they are not available, fall back to PostgreSQL for fetching all the messages for the user.
+
+
+3.2. Typing Status Management 
+
+-- Components Involved: --
+> StatusController
+> StatusService 
+> TypingStatusRepository 
+
+-- Flow: --
+> The StatusController exposes APIs to update and fetch the typing status.
+> The StatusService manages the logic of updating and fetching typing status.
+> The typing status is stored in the TypingStatusRequest entity, and the repository manages persistence in PostgreSQL.
+
+-- Sequence Diagram: --
+User -> StatusController -> StatusService -> TypingStatusRepository
+
+-- Detailed Steps: --
+1. Set Typing Status:
+> When a user starts typing, the client calls the API (/typing) with the typing status.
+> The StatusService updates the TypingStatusRequest entity in the PostgreSQL database. 
+
+2. Get Typing Status:
+> To check whether a user is typing, the client calls the API (/typing), and the status is retrieved from the database.
+
+
+3.3. Redis Configuration
+
+-- Components Involved: --
+>RedisConfig
+>RedisTemplate
+
+-- Flow: --
+> The RedisConfig class configures Redis by creating a RedisTemplate bean.
+> The RedisTemplate is used in the ChatService to interact with Redis for storing messages.
+
+-- Detailed Steps: --
+1. Redis Template Configuration:
+> The RedisConfig class initializes a RedisTemplate<String, Message> that connects to the Redis server.
+> It sets serializers for both the key and value to handle the conversion of Java objects (e.g., Message) to Redis-compatible formats.

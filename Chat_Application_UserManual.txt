@@ -1,0 +1,91 @@
+Topic : Chat Application (Redis for Performance) 
+
+-- User Manual -- 
+
+1. Send a Message
+
+API Endpoint: POST /api/chat/{chatRoom}/send 
+Request URL: http://localhost:8080/api/chat/general/send
+
+Request Body (JSON):
+{
+  "sender": "Navanee",
+  "receiver": "Bala",
+  "content": "Happy Pongal",
+  "timestamp": "2025-01-14T10:00:00"
+}
+
+2. Get Recent Messages
+
+API Endpoint: GET /api/chat/{chatRoom}/recent
+Request URL: http://localhost:8080/api/chat/general/recent 
+
+Response:
+{
+        "id": 8,
+        "sender": "Navanee",
+        "receiver": "Bala",
+        "content": "Happy Pongal",
+        "timestamp": "2025-01-14T10:00:00",
+        "typingStatus": {
+            "id": 5,
+            "sender": "Navanee",
+            "typing": false
+        }
+    } 
+	
+3. Get All Messages for a User 
+
+API Endpoint: GET /api/chat/{receiver}/all
+Request URL: http://localhost:8080/api/chat/Bala/all 
+
+Response:
+{
+        "id": 8,
+        "sender": "Navanee",
+        "receiver": "Bala",
+        "content": "Happy Pongal",
+        "timestamp": "2025-01-14T10:00:00",
+        "typingStatus": {
+            "id": 5,
+            "sender": "Navanee",
+            "typing": false
+        }
+    } 
+	
+4. Update Typing Status
+
+API Endpoint: POST /api/status/{user}/typing
+Request URL: http://localhost:8080/api/status/Kumar/typing 
+
+Request Body (JSON):
+{
+  "isTyping": false
+} 
+
+5. Get Typing Status
+
+API Endpoint: GET /api/status/{user}/typing
+Request URL: http://localhost:8080/api/status/Kumar/typing 
+
+Response:
+{
+  "isTyping": true
+}
+
+
+-- Redis Commands Summary -- 
+
+1. Add Message to Redis Cache:
+LPUSH messages:<chatRoom> '{"sender":"Navanee", "receiver":"Bala", "content":"Happy Pongal", "timestamp":"2025-01-14T10:00:00"}'
+
+2. Retrieve Recent Messages (Last 20):
+LRANGE messages:<chatRoom> 0 19
+
+3. Set Typing Status:
+SET typingStatus:<user> true  
+SET typingStatus:<user> false  
+
+4. Get Typing Status:
+GET typingStatus:<user>
+
